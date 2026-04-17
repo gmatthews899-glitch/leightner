@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leightner Electronics Inc. — Internal Hub</title>
+<style>
+  :root {
+    --navy:        #0d2340;
+    --navy-deep:   #081831;
+    --navy-soft:   #18355c;
+    --steel:       #3a5577;
+    --steel-light: #7a8fa8;
+    --ink:         #111820;
+    --paper:       #f4f2ec;
+    --paper-warm:  #ebe7dc;
+    --line:        #d6d0c0;
+    --line-soft:   #e4dfd1;
+    --accent:      #c8431f;     /* industrial rust-orange */
+    --accent-deep: #9a3416;
+    --accent-soft: #f2d9cf;
+    --good:        #2f6b4a;
+    --good-soft:   #d6ead9;
+    --warn:        #b8791a;
+    --warn-soft:   #f3e3c2;
+    --danger:      #a02929;
+    --danger-soft: #ead2d2;
+
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Consolas, "Liberation Mono", monospace;
+
+    --shadow-sm: 0 1px 2px rgba(13,35,64,0.06), 0 1px 1px rgba(13,35,64,0.04);
+    --shadow-md: 0 4px 16px rgba(13,35,64,0.08), 0 2px 4px rgba(13,35,64,0.04);
+    --shadow-lg: 0 12px 32px rgba(13,35,64,0.12), 0 4px 8px rgba(13,35,64,0.06);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(13,35,64,0.04) 1px, transparent 0);
+    background-size: 24px 24px;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
+
+  /* =========== HEADER =========== */
+  .app-header {
+    background: var(--navy);
+    background-image: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color: var(--paper);
+    border-bottom: 3px solid var(--accent);
+  }
+  .app-header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .brand-text .brand-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0;
+    line-height: 1.1;
+    color: var(--paper);
+  }
+  .brand-text .brand-sub {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--steel-light);
+    margin-top: 2px;
+  }
+  .header-meta {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--steel-light);
+  }
+  .header-meta .dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #6fd38c;
+    margin-right: 7px;
+    box-shadow: 0 0 0 3px rgba(111,211,140,0.2);
+  }
+
+  /* =========== BREADCRUMB =========== */
+  .breadcrumb {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--steel);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .breadcrumb a { color: var(--steel); text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb .sep { color: var(--line); }
+  .breadcrumb .current { color: var(--ink); font-weight: 600; }
+
+  /* =========== MAIN =========== */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* =========== HUB (LANDING) =========== */
+  .hub-hero {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 40px;
+    align-items: end;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hub-hero h1 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: 0;
+    line-height: 1.15;
+    margin: 0 0 10px 0;
+    color: var(--ink);
+  }
+  .hub-hero h1 em {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .hub-hero p {
+    font-size: 14px;
+    color: var(--steel);
+    max-width: 520px;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .hero-stat {
+    background: var(--paper);
+    padding: 18px 20px;
+  }
+  .hero-stat .label {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--steel);
+    margin-bottom: 8px;
+  }
+  .hero-stat .value {
+    font-family: var(--sans);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .hero-stat .value .unit {
+    font-size: 13px;
+    color: var(--steel);
+    margin-left: 4px;
+    font-family: var(--sans);
+    font-weight: 500;
+  }
+
+  .hub-section-label {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--steel);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hub-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .tile {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 28px 28px 24px;
+    position: relative;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    overflow: hidden;
+  }
+  .tile::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--navy);
+    transition: all 0.2s ease;
+  }
+  .tile.live::before { background: var(--accent); }
+  .tile:hover {
+    border-color: var(--navy);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .tile.live:hover::before { width: 6px; }
+  .tile.placeholder { cursor: default; opacity: 0.78; }
+  .tile.placeholder:hover {
+    border-color: var(--line);
+    transform: none;
+    box-shadow: none;
+  }
+
+  .tile-status {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 3px 9px;
+    display: inline-block;
+    align-self: flex-start;
+    margin-bottom: 16px;
+  }
+  .tile-status.live {
+    background: var(--accent);
+    color: white;
+  }
+  .tile-status.soon {
+    background: var(--paper-warm);
+    color: var(--steel);
+    border: 1px solid var(--line);
+  }
+
+  .tile-icon {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 32px;
+    height: 32px;
+    opacity: 0.3;
+  }
+  .tile:hover .tile-icon { opacity: 0.6; }
+
+  .tile-title {
+    font-family: var(--sans);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin: 0 0 8px 0;
+    color: var(--ink);
+  }
+  .tile-desc {
+    font-size: 13.5px;
+    color: var(--steel);
+    line-height: 1.5;
+    margin: 0 0 auto 0;
+  }
+  .tile-meta {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--steel);
+  }
+  .tile-meta .cta {
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .tile.live:hover .tile-meta .cta { color: var(--accent); }
+
+  /* =========== ISSUE TRACKER =========== */
+  .tracker-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tracker-title h1 {
+    font-family: var(--sans);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+  }
+  .tracker-title p {
+    font-size: 14px;
+    color: var(--steel);
+    margin: 0;
+    max-width: 520px;
+  }
+
+  .btn {
+    background: var(--navy);
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:hover { background: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn.ghost { background: transparent; color: var(--navy); border: 1px solid var(--line); }
+  .btn.ghost:hover { background: var(--navy); color: white; border-color: var(--navy); }
+  .btn.danger { background: var(--danger); }
+  .btn.danger:hover { background: #7d1e1e; }
+  .btn.small { padding: 8px 14px; font-size: 11.5px; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* Stat strip */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-bottom: 32px;
+  }
+  .stat {
+    background: var(--paper);
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    position: relative;
+  }
+  .stat:hover { background: var(--paper-warm); }
+  .stat.active { background: var(--navy); color: white; }
+  .stat.active .stat-label { color: rgba(255,255,255,0.7); }
+  .stat-label {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--steel);
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: var(--sans);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .stat-value.accent { color: var(--accent); }
+  .stat.active .stat-value.accent { color: #ff8a5c; }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-bar input, .filter-bar select {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 10px 14px;
+    font-size: 13.5px;
+    color: var(--ink);
+    transition: border-color 0.15s ease;
+  }
+  .filter-bar input:focus, .filter-bar select:focus {
+    outline: none;
+    border-color: var(--navy);
+  }
+  .filter-bar input[type="search"] { min-width: 280px; flex: 1; max-width: 400px; }
+
+  /* Issues table */
+  .issues-table {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .issues-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .issues-table thead th {
+    background: var(--navy);
+    color: var(--paper);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--navy-deep);
+  }
+  .issues-table tbody td {
+    padding: 16px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+    font-size: 13.5px;
+  }
+  .issues-table tbody tr { cursor: pointer; transition: background 0.1s ease; }
+  .issues-table tbody tr:hover { background: var(--paper-warm); }
+  .issues-table tbody tr:last-child td { border-bottom: none; }
+  .issues-table .id-cell {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--steel);
+    white-space: nowrap;
+  }
+  .issues-table .title-cell {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .issues-table .title-cell .sub {
+    font-weight: 400;
+    color: var(--steel);
+    font-size: 12.5px;
+    margin-top: 3px;
+  }
+  .empty-state {
+    padding: 60px 32px;
+    text-align: center;
+    color: var(--steel);
+  }
+  .empty-state h3 {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: var(--ink);
+  }
+  .empty-state p { margin: 0 0 24px 0; font-size: 14px; }
+
+  /* Status & category pills */
+  .pill {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 12px;
+    padding: 4px 10px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .pill.status-open      { background: var(--danger-soft); color: var(--danger); }
+  .pill.status-contained { background: var(--warn-soft);   color: var(--warn); }
+  .pill.status-investigating { background: #e0e7f0; color: var(--navy); }
+  .pill.status-action    { background: #e0ebe4; color: var(--good); }
+  .pill.status-verifying { background: #f0e4d6; color: #8a5a1b; }
+  .pill.status-closed    { background: var(--good-soft); color: var(--good); }
+  .pill.status-wontfix   { background: #e5e2d8; color: #6b6652; }
+
+  .pill.cat { background: #eae4d3; color: #5b543e; }
+  .pill.sev-high { background: var(--danger-soft); color: var(--danger); }
+  .pill.sev-med  { background: var(--warn-soft);   color: var(--warn); }
+  .pill.sev-low  { background: #e0e7f0; color: var(--navy); }
+
+  /* =========== ISSUE FORM =========== */
+  .form-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 40px 44px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .form-card h2 {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin: 0 0 6px 0;
+  }
+  .form-card .form-sub {
+    color: var(--steel);
+    font-size: 14px;
+    margin: 0 0 32px 0;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+  }
+  .form-field { display: flex; flex-direction: column; }
+  .form-field.full { grid-column: 1 / -1; }
+  .form-field label {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .form-field label .req { color: var(--accent); margin-left: 2px; }
+  .form-field label .hint {
+    color: var(--steel-light);
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 8px;
+    font-family: var(--sans);
+  }
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    background: white;
+    border: 1px solid var(--line);
+    padding: 11px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color 0.15s ease;
+    width: 100%;
+  }
+  .form-field textarea { resize: vertical; min-height: 90px; font-family: var(--sans); }
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(13,35,64,0.08);
+  }
+  .form-actions {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  /* =========== ISSUE DETAIL =========== */
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+  }
+  .detail-main {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 36px 40px;
+  }
+  .detail-side {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .detail-id {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--steel);
+    margin-bottom: 8px;
+  }
+  .detail-main h1 {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin: 0 0 14px 0;
+    line-height: 1.3;
+  }
+  .detail-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .detail-section {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .detail-section h3 {
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink);
+    margin: 0 0 12px 0;
+    font-weight: 600;
+  }
+  .detail-section .body {
+    font-size: 14.5px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    color: var(--ink);
+  }
+  .detail-section .body.placeholder {
+    color: var(--steel-light);
+  }
+  .editable-field textarea {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--line);
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+    resize: vertical;
+    min-height: 80px;
+    font-family: var(--sans);
+  }
+  .editable-field textarea:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(13,35,64,0.08);
+  }
+  .editable-field .field-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+  }
+  .edit-link {
+    background: none;
+    border: none;
+    color: var(--navy);
+    font-size: 12px;
+    font-family: var(--sans);
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+  }
+  .edit-link:hover { color: var(--accent); }
+
+  /* Side cards */
+  .side-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 20px 22px;
+  }
+  .side-card h4 {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink);
+    margin: 0 0 14px 0;
+    font-weight: 600;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-row .k { color: var(--steel); font-size: 12px; }
+  .meta-row .v { font-weight: 600; color: var(--ink); text-align: right; }
+  .meta-row select {
+    background: white;
+    border: 1px solid var(--line);
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Activity log */
+  .log-list {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .log-entry {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 12px;
+    position: relative;
+  }
+  .log-entry::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 22px;
+    bottom: -22px;
+    width: 2px;
+    background: var(--line);
+  }
+  .log-entry:last-child::before { display: none; }
+  .log-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--steel);
+    margin: 6px auto;
+    position: relative;
+    z-index: 1;
+    border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--steel);
+  }
+  .log-dot.status { background: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .log-dot.note   { background: var(--navy); box-shadow: 0 0 0 1px var(--navy); }
+  .log-dot.created { background: var(--good); box-shadow: 0 0 0 1px var(--good); }
+  .log-body {
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .log-meta {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--steel);
+    margin-bottom: 3px;
+  }
+  .log-text { color: var(--ink); white-space: pre-wrap; }
+  .log-text.subtle { color: var(--steel); }
+
+  .add-update {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .add-update textarea {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--line);
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink);
+    resize: vertical;
+    min-height: 70px;
+    font-family: var(--sans);
+  }
+  .add-update textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(13,35,64,0.08); }
+  .add-update-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    gap: 10px;
+  }
+  .add-update-row input {
+    flex: 1;
+    min-width: 120px;
+    background: white;
+    border: 1px solid var(--line);
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  /* =========== PLACEHOLDER VIEWS =========== */
+  .placeholder-view {
+    text-align: center;
+    padding: 80px 32px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .placeholder-view .marker {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .placeholder-view h1 {
+    font-family: var(--sans);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin: 0 0 14px 0;
+    line-height: 1.2;
+  }
+  .placeholder-view p {
+    color: var(--steel);
+    font-size: 15.5px;
+    line-height: 1.65;
+    margin: 0 0 16px 0;
+  }
+  .placeholder-preview {
+    margin-top: 40px;
+    background: var(--paper);
+    border: 1px dashed var(--line);
+    padding: 32px;
+    text-align: left;
+  }
+  .placeholder-preview h4 {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink);
+    margin: 0 0 14px 0;
+    font-weight: 600;
+  }
+  .placeholder-preview ul {
+    margin: 0; padding: 0; list-style: none;
+    display: grid; gap: 10px;
+  }
+  .placeholder-preview li {
+    padding: 10px 14px;
+    background: var(--paper-warm);
+    font-size: 13.5px;
+    color: var(--ink);
+    border-left: 3px solid var(--steel-light);
+  }
+
+  /* =========== FOOTER =========== */
+  footer {
+    max-width: 1400px;
+    margin: 40px auto 0;
+    padding: 24px 32px;
+    border-top: 1px solid var(--line);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--steel);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer .footer-actions { display: flex; gap: 16px; }
+  footer a {
+    color: var(--steel);
+    text-decoration: none;
+    cursor: pointer;
+    border-bottom: 1px dotted var(--line);
+    padding-bottom: 2px;
+  }
+  footer a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* =========== TOAST =========== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--navy);
+    color: white;
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    border-left: 3px solid var(--accent);
+    transform: translateY(120%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 9999;
+    max-width: 340px;
+  }
+  .toast.show { transform: translateY(0); }
+
+  /* =========== MODAL =========== */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(8, 24, 49, 0.65);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+  }
+  .modal-backdrop.show { display: flex; animation: fadeIn 0.15s ease; }
+  .modal {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 32px 36px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h3 {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+  }
+  .modal p { margin: 0 0 24px 0; color: var(--steel); font-size: 14px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+
+  @media (max-width: 900px) {
+    .hub-hero { grid-template-columns: 1fr; gap: 32px; }
+    .hub-hero h1 { font-size: 38px; }
+    .detail-layout { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    .header-meta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <div class="brand" onclick="nav('hub')">
+      <div class="brand-text">
+        <div class="brand-name">Leightner Electronics Inc.</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span><span class="dot"></span>Local · Prototype</span>
+      <span id="headerDate"></span>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" id="breadcrumb"></nav>
+
+<main>
+  <!-- ============ HUB VIEW ============ -->
+  <section id="view-hub" class="view active">
+    <div class="hub-hero">
+      <div>
+        <h1>Operations Hub</h1>
+        <p>Central access point for internal tools. Select a module below to get started.</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="label">Open Issues</div>
+          <div class="value" id="heroOpen">—</div>
+        </div>
+        <div class="hero-stat">
+          <div class="label">Modules Live</div>
+          <div class="value">1<span class="unit">of 5</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hub-section-label">Modules</div>
+    <div class="tile-grid">
+
+      <div class="tile live" onclick="nav('tracker')">
+        <span class="tile-status live">● Live</span>
+        <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+        </svg>
+        <h3 class="tile-title">Issue & Corrective Action Tracker</h3>
+        <p class="tile-desc">Document recurring problems, investigate root causes, and track fixes through to verified resolution.</p>
+        <div class="tile-meta">
+          <span><span id="tileOpenCount">0</span> open · <span id="tileTotalCount">0</span> total</span>
+          <span class="cta">Open module →</span>
+        </div>
+      </div>
+
+      <div class="tile placeholder">
+        <span class="tile-status soon">Coming Soon</span>
+        <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 7h18M3 12h18M3 17h18"/>
+        </svg>
+        <h3 class="tile-title">Active Jobs</h3>
+        <p class="tile-desc">Live view of every open job — customer, stage (quote, design, prototype, production, test, ship), point of contact, due date.</p>
+        <div class="tile-meta">
+          <span>Phase 2</span>
+          <span class="cta" style="color: var(--steel-light);">Planned</span>
+        </div>
+      </div>
+
+      <div class="tile placeholder">
+        <span class="tile-status soon">Coming Soon</span>
+        <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 21v-2a6 6 0 0112 0v2M20 11a3 3 0 11-6 0 3 3 0 016 0zM21 21v-1a4 4 0 00-3-3.87"/>
+        </svg>
+        <h3 class="tile-title">Customers & Contacts</h3>
+        <p class="tile-desc">Centralized directory of customers, points of contact, and associated active and historical jobs.</p>
+        <div class="tile-meta">
+          <span>Phase 2</span>
+          <span class="cta" style="color: var(--steel-light);">Planned</span>
+        </div>
+      </div>
+
+      <div class="tile placeholder">
+        <span class="tile-status soon">Coming Soon</span>
+        <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9l-6-6z"/><path d="M14 3v6h6M8 13h8M8 17h8M8 9h2"/>
+        </svg>
+        <h3 class="tile-title">Documents & SOPs</h3>
+        <p class="tile-desc">Searchable repository for standard operating procedures, work instructions, travelers, and reference documentation.</p>
+        <div class="tile-meta">
+          <span>Phase 2</span>
+          <span class="cta" style="color: var(--steel-light);">Planned</span>
+        </div>
+      </div>
+
+      <div class="tile placeholder">
+        <span class="tile-status soon">Coming Soon</span>
+        <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 3v18h18M8 14l4-4 4 4 4-4"/>
+        </svg>
+        <h3 class="tile-title">Reports & Metrics</h3>
+        <p class="tile-desc">Quality metrics, on-time delivery performance, and recurring-issue trends. Summary view for management reporting.</p>
+        <div class="tile-meta">
+          <span>Phase 2</span>
+          <span class="cta" style="color: var(--steel-light);">Planned</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TRACKER VIEW ============ -->
+  <section id="view-tracker" class="view">
+    <div class="tracker-header">
+      <div class="tracker-title">
+        <h1>Issue & Corrective Action Tracker</h1>
+        <p>Document problems as they happen. Track investigation, root cause, and corrective action through to verified resolution.</p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn ghost" onclick="seedDemoData()" title="Load a couple example issues for demo purposes">Load Examples</button>
+        <button class="btn" onclick="nav('new')">+ New Issue</button>
+      </div>
+    </div>
+
+    <div class="stat-strip" id="statStrip"></div>
+
+    <div class="filter-bar">
+      <input type="search" id="searchBox" placeholder="Search issues, keywords, part numbers..." oninput="renderIssues()" />
+      <select id="filterCategory" onchange="renderIssues()">
+        <option value="">All categories</option>
+        <option>Production / Process</option>
+        <option>Quality / Test Failure</option>
+        <option>Material / Supplier</option>
+        <option>Design / Engineering</option>
+        <option>Equipment / Tooling</option>
+        <option>Shipping / Packaging</option>
+        <option>Other</option>
+      </select>
+      <select id="filterSeverity" onchange="renderIssues()">
+        <option value="">All severities</option>
+        <option>High</option>
+        <option>Medium</option>
+        <option>Low</option>
+      </select>
+      <select id="sortBy" onchange="renderIssues()">
+        <option value="updated_desc">Recently updated</option>
+        <option value="created_desc">Newest first</option>
+        <option value="created_asc">Oldest first</option>
+        <option value="severity">Severity</option>
+      </select>
+    </div>
+
+    <div class="issues-table" id="issuesTable"></div>
+  </section>
+
+  <!-- ============ NEW ISSUE VIEW ============ -->
+  <section id="view-new" class="view">
+    <div class="form-card">
+      <h2>Log a New Issue</h2>
+      <p class="form-sub">Fill out what you know. You can add details, updates, root cause, and corrective action later as you investigate.</p>
+
+      <form id="newIssueForm" onsubmit="saveNewIssue(event)">
+        <div class="form-grid">
+          <div class="form-field full">
+            <label>Title <span class="req">*</span> <span class="hint">One line that describes the problem</span></label>
+            <input required name="title" placeholder="e.g. Stycast 2850 potting showing bubbles in coil castings" />
+          </div>
+
+          <div class="form-field">
+            <label>Reported by <span class="req">*</span></label>
+            <input required name="reportedBy" placeholder="Your name" />
+          </div>
+
+          <div class="form-field">
+            <label>Date reported <span class="req">*</span></label>
+            <input required type="date" name="dateReported" id="dateReportedField" />
+          </div>
+
+          <div class="form-field">
+            <label>Category <span class="req">*</span></label>
+            <select required name="category">
+              <option value="">Select category...</option>
+              <option>Production / Process</option>
+              <option>Quality / Test Failure</option>
+              <option>Material / Supplier</option>
+              <option>Design / Engineering</option>
+              <option>Equipment / Tooling</option>
+              <option>Shipping / Packaging</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Severity <span class="req">*</span> <span class="hint">How much is this hurting us?</span></label>
+            <select required name="severity">
+              <option value="">Select severity...</option>
+              <option>High</option>
+              <option>Medium</option>
+              <option>Low</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Related job / PO <span class="hint">If applicable</span></label>
+            <input name="relatedJob" placeholder="e.g. Lockheed PO-44712, or leave blank" />
+          </div>
+
+          <div class="form-field">
+            <label>Part / material / assembly <span class="hint">If applicable</span></label>
+            <input name="partNumber" placeholder="e.g. Stycast 2850 FT Blue, or bobbin P/N" />
+          </div>
+
+          <div class="form-field full">
+            <label>Description <span class="req">*</span> <span class="hint">What happened? When did it start? How often?</span></label>
+            <textarea required name="description" rows="4" placeholder="Describe the problem. Include when it started, how often it occurs, what's been tried, and anything else relevant."></textarea>
+          </div>
+
+          <div class="form-field full">
+            <label>Immediate containment <span class="hint">What's being done right now to prevent bad product from shipping?</span></label>
+            <textarea name="containment" rows="2" placeholder="e.g. Holding affected lot in quarantine until root cause is known. Leave blank if N/A."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn ghost" onclick="nav('tracker')">Cancel</button>
+          <button type="submit" class="btn">Save Issue</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ ISSUE DETAIL VIEW ============ -->
+  <section id="view-detail" class="view"></section>
+
+</main>
+
+<footer>
+  <div>Leightner Electronics Inc. · Internal Hub · v0.1</div>
+  <div class="footer-actions">
+    <a onclick="exportData()">Export Data (JSON)</a>
+    <a onclick="importData()">Import Data</a>
+    <a onclick="confirmReset()">Reset All Data</a>
+  </div>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3 id="modalTitle">Are you sure?</h3>
+    <p id="modalBody">This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn danger" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)" />
+
+<script>
+// ============ STATE ============
+const STORAGE_KEY = 'leightner_hub_v1';
+let state = loadState();
+let currentIssueId = null;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { issues: [], nextId: 1 };
+    return JSON.parse(raw);
+  } catch (e) {
+    return { issues: [], nextId: 1 };
+  }
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// ============ NAVIGATION ============
+function nav(view, issueId = null) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  currentIssueId = issueId;
+
+  const crumb = document.getElementById('breadcrumb');
+  if (view === 'hub') {
+    crumb.innerHTML = '';
+    crumb.style.display = 'none';
+    renderHub();
+  } else if (view === 'tracker') {
+    crumb.style.display = 'flex';
+    crumb.innerHTML = '<a onclick="nav(\'hub\')">Home</a><span class="sep">/</span><span class="current">Issue Tracker</span>';
+    renderTracker();
+  } else if (view === 'new') {
+    crumb.style.display = 'flex';
+    crumb.innerHTML = '<a onclick="nav(\'hub\')">Home</a><span class="sep">/</span><a onclick="nav(\'tracker\')">Issue Tracker</a><span class="sep">/</span><span class="current">New Issue</span>';
+    document.getElementById('newIssueForm').reset();
+    document.getElementById('dateReportedField').value = new Date().toISOString().split('T')[0];
+  } else if (view === 'detail') {
+    const iss = state.issues.find(i => i.id === issueId);
+    if (!iss) { nav('tracker'); return; }
+    crumb.style.display = 'flex';
+    crumb.innerHTML = `<a onclick="nav('hub')">Home</a><span class="sep">/</span><a onclick="nav('tracker')">Issue Tracker</a><span class="sep">/</span><span class="current">${iss.displayId}</span>`;
+    renderDetail(iss);
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============ HUB RENDERING ============
+function renderHub() {
+  const open = state.issues.filter(i => !['Closed - Verified', "Won't Fix"].includes(i.status)).length;
+  const total = state.issues.length;
+  document.getElementById('heroOpen').textContent = open;
+  document.getElementById('tileOpenCount').textContent = open;
+  document.getElementById('tileTotalCount').textContent = total;
+}
+
+// ============ TRACKER RENDERING ============
+const STATUSES = ['Open', 'Contained', 'Investigating', 'Action In Progress', 'Verifying Fix', 'Closed - Verified', "Won't Fix"];
+const STATUS_CLASS = {
+  'Open': 'status-open',
+  'Contained': 'status-contained',
+  'Investigating': 'status-investigating',
+  'Action In Progress': 'status-action',
+  'Verifying Fix': 'status-verifying',
+  'Closed - Verified': 'status-closed',
+  "Won't Fix": 'status-wontfix'
+};
+
+let activeStatFilter = null;
+
+function renderTracker() {
+  renderStatStrip();
+  renderIssues();
+}
+
+function renderStatStrip() {
+  const strip = document.getElementById('statStrip');
+  const open = state.issues.filter(i => !['Closed - Verified', "Won't Fix"].includes(i.status)).length;
+  const investigating = state.issues.filter(i => i.status === 'Investigating' || i.status === 'Action In Progress').length;
+  const highSev = state.issues.filter(i => i.severity === 'High' && !['Closed - Verified', "Won't Fix"].includes(i.status)).length;
+  const verifying = state.issues.filter(i => i.status === 'Verifying Fix').length;
+  const closed = state.issues.filter(i => i.status === 'Closed - Verified').length;
+
+  const items = [
+    { label: 'Open Total', value: open, filter: 'open', accent: true },
+    { label: 'High Severity', value: highSev, filter: 'high' },
+    { label: 'Investigating', value: investigating, filter: 'investigating' },
+    { label: 'Verifying Fix', value: verifying, filter: 'verifying' },
+    { label: 'Closed (Verified)', value: closed, filter: 'closed' },
+  ];
+
+  strip.innerHTML = items.map(it => `
+    <div class="stat ${activeStatFilter === it.filter ? 'active' : ''}" onclick="toggleStatFilter('${it.filter}')">
+      <div class="stat-label">${it.label}</div>
+      <div class="stat-value ${it.accent ? 'accent' : ''}">${it.value}</div>
+    </div>
+  `).join('');
+}
+
+function toggleStatFilter(f) {
+  activeStatFilter = (activeStatFilter === f) ? null : f;
+  renderTracker();
+}
+
+function renderIssues() {
+  const search = document.getElementById('searchBox').value.trim().toLowerCase();
+  const cat = document.getElementById('filterCategory').value;
+  const sev = document.getElementById('filterSeverity').value;
+  const sort = document.getElementById('sortBy').value;
+
+  let list = [...state.issues];
+
+  // Stat filter
+  if (activeStatFilter === 'open') list = list.filter(i => !['Closed - Verified', "Won't Fix"].includes(i.status));
+  if (activeStatFilter === 'high') list = list.filter(i => i.severity === 'High' && !['Closed - Verified', "Won't Fix"].includes(i.status));
+  if (activeStatFilter === 'investigating') list = list.filter(i => ['Investigating', 'Action In Progress'].includes(i.status));
+  if (activeStatFilter === 'verifying') list = list.filter(i => i.status === 'Verifying Fix');
+  if (activeStatFilter === 'closed') list = list.filter(i => i.status === 'Closed - Verified');
+
+  if (cat) list = list.filter(i => i.category === cat);
+  if (sev) list = list.filter(i => i.severity === sev);
+  if (search) {
+    list = list.filter(i =>
+      (i.title || '').toLowerCase().includes(search) ||
+      (i.description || '').toLowerCase().includes(search) ||
+      (i.partNumber || '').toLowerCase().includes(search) ||
+      (i.relatedJob || '').toLowerCase().includes(search) ||
+      (i.displayId || '').toLowerCase().includes(search) ||
+      (i.rootCause || '').toLowerCase().includes(search) ||
+      (i.correctiveAction || '').toLowerCase().includes(search)
+    );
+  }
+
+  if (sort === 'updated_desc') list.sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  if (sort === 'created_desc') list.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  if (sort === 'created_asc')  list.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+  if (sort === 'severity') {
+    const r = { High: 0, Medium: 1, Low: 2 };
+    list.sort((a,b) => (r[a.severity] ?? 9) - (r[b.severity] ?? 9));
+  }
+
+  const tbl = document.getElementById('issuesTable');
+  if (list.length === 0) {
+    tbl.innerHTML = `
+      <div class="empty-state">
+        <h3>No issues ${state.issues.length === 0 ? 'yet' : 'match your filters'}</h3>
+        <p>${state.issues.length === 0 ? 'Log the first one to get started. Or load a couple examples to see how this works.' : 'Try clearing filters or adjusting your search.'}</p>
+        ${state.issues.length === 0 ? '<button class="btn" onclick="nav(\'new\')">+ Log First Issue</button>' : ''}
+      </div>`;
+    return;
+  }
+
+  tbl.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 90px;">ID</th>
+          <th>Issue</th>
+          <th style="width: 140px;">Category</th>
+          <th style="width: 90px;">Severity</th>
+          <th style="width: 150px;">Status</th>
+          <th style="width: 110px;">Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(i => `
+          <tr onclick="nav('detail', ${i.id})">
+            <td class="id-cell">${i.displayId}</td>
+            <td class="title-cell">
+              ${escapeHtml(i.title)}
+              ${i.partNumber || i.relatedJob ? `<div class="sub">${[i.partNumber, i.relatedJob].filter(Boolean).map(escapeHtml).join(' · ')}</div>` : ''}
+            </td>
+            <td><span class="pill cat">${escapeHtml(i.category)}</span></td>
+            <td><span class="pill sev-${sevClass(i.severity)}">${i.severity}</span></td>
+            <td><span class="pill ${STATUS_CLASS[i.status] || 'status-open'}">${i.status}</span></td>
+            <td style="color: var(--steel); font-size: 12.5px;">${relativeDate(i.updatedAt)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
+}
+
+function sevClass(s) { return s === 'High' ? 'high' : s === 'Medium' ? 'med' : 'low'; }
+
+// ============ NEW ISSUE ============
+function saveNewIssue(e) {
+  e.preventDefault();
+  const f = e.target;
+  const now = new Date().toISOString();
+  const id = state.nextId++;
+  const year = new Date().getFullYear();
+  const displayId = `LEI-${year}-${String(id).padStart(4, '0')}`;
+  const reportedBy = f.reportedBy.value.trim();
+
+  const issue = {
+    id,
+    displayId,
+    title: f.title.value.trim(),
+    reportedBy,
+    dateReported: f.dateReported.value,
+    category: f.category.value,
+    severity: f.severity.value,
+    relatedJob: f.relatedJob.value.trim(),
+    partNumber: f.partNumber.value.trim(),
+    description: f.description.value.trim(),
+    containment: f.containment.value.trim(),
+    rootCause: '',
+    correctiveAction: '',
+    verification: '',
+    status: f.containment.value.trim() ? 'Contained' : 'Open',
+    createdAt: now,
+    updatedAt: now,
+    log: [{
+      type: 'created',
+      author: reportedBy,
+      date: now,
+      text: 'Issue logged.'
+    }]
+  };
+
+  if (f.containment.value.trim()) {
+    issue.log.push({
+      type: 'status',
+      author: reportedBy,
+      date: now,
+      text: `Status set to Contained. Containment: ${f.containment.value.trim()}`
+    });
+  }
+
+  state.issues.push(issue);
+  saveState();
+  toast(`Issue ${displayId} saved`);
+  nav('detail', id);
+}
+
+// ============ DETAIL VIEW ============
+function renderDetail(i) {
+  const v = document.getElementById('view-detail');
+  v.innerHTML = `
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <button class="btn ghost small" onclick="nav('tracker')">← Back to all issues</button>
+      <button class="btn ghost small danger" onclick="confirmDelete(${i.id})" style="color: var(--danger); border-color: var(--danger-soft);">Delete Issue</button>
+    </div>
+    <div class="detail-layout">
+      <div class="detail-main">
+        <div class="detail-id">${i.displayId} · Reported by ${escapeHtml(i.reportedBy)} on ${formatDate(i.dateReported)}</div>
+        <h1>${escapeHtml(i.title)}</h1>
+        <div class="detail-pills">
+          <span class="pill cat">${escapeHtml(i.category)}</span>
+          <span class="pill sev-${sevClass(i.severity)}">${i.severity} Severity</span>
+          <span class="pill ${STATUS_CLASS[i.status] || 'status-open'}">${i.status}</span>
+        </div>
+
+        ${editableSection('Description', 'description', i.description, 'What happened. When it started. How often.')}
+        ${editableSection('Immediate Containment', 'containment', i.containment, 'What\'s being done right now so bad product doesn\'t ship.')}
+        ${editableSection('Root Cause', 'rootCause', i.rootCause, 'The underlying cause. Not the symptom. Tip: ask "why?" five times.')}
+        ${editableSection('Corrective Action', 'correctiveAction', i.correctiveAction, 'What we\'re doing to permanently fix the cause.')}
+        ${editableSection('Verification', 'verification', i.verification, 'Evidence that the fix worked. Date verified, by whom, how.')}
+
+        <div class="detail-section">
+          <h3>Activity Log</h3>
+          <div class="log-list">
+            ${(i.log || []).slice().reverse().map(renderLogEntry).join('')}
+          </div>
+          <div class="add-update">
+            <textarea id="updateText" placeholder="Add an update — what you tried, what you found, what changed..."></textarea>
+            <div class="add-update-row">
+              <input id="updateAuthor" placeholder="Your name" value="${escapeHtml(i.reportedBy)}" />
+              <button class="btn small" onclick="addLogEntry(${i.id})">Add Update</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="detail-side">
+        <div class="side-card">
+          <h4>Status</h4>
+          <div class="meta-row">
+            <span class="k">Current</span>
+            <select class="v" onchange="changeStatus(${i.id}, this.value)">
+              ${STATUSES.map(s => `<option ${s === i.status ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="meta-row"><span class="k">Created</span><span class="v">${formatDate(i.createdAt)}</span></div>
+          <div class="meta-row"><span class="k">Last update</span><span class="v">${relativeDate(i.updatedAt)}</span></div>
+        </div>
+
+        <div class="side-card">
+          <h4>Details</h4>
+          <div class="meta-row"><span class="k">Related job</span><span class="v">${escapeHtml(i.relatedJob) || '—'}</span></div>
+          <div class="meta-row"><span class="k">Part / material</span><span class="v" style="max-width:180px; overflow-wrap:break-word;">${escapeHtml(i.partNumber) || '—'}</span></div>
+          <div class="meta-row"><span class="k">Reported by</span><span class="v">${escapeHtml(i.reportedBy)}</span></div>
+          <div class="meta-row"><span class="k">Category</span><span class="v">${escapeHtml(i.category)}</span></div>
+        </div>
+
+        <div class="side-card" style="background: var(--navy); color: var(--paper); border-color: var(--navy);">
+          <h4 style="color: rgba(255,255,255,0.7);">Resolution Progress</h4>
+          <div style="font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.85);">
+            ${isoProgress(i)}
+          </div>
+        </div>
+      </aside>
+    </div>
+  `;
+}
+
+function editableSection(title, field, value, placeholder) {
+  const hasValue = value && value.trim();
+  return `
+    <div class="detail-section">
+      <h3>${title} <button class="edit-link" onclick="editField(${currentIssueId}, '${field}', '${title.replace(/'/g, "\\'")}')">${hasValue ? 'Edit' : 'Add'}</button></h3>
+      <div class="body ${hasValue ? '' : 'placeholder'}">${hasValue ? escapeHtml(value) : placeholder}</div>
+    </div>
+  `;
+}
+
+function editField(issueId, field, label) {
+  const iss = state.issues.find(i => i.id === issueId);
+  if (!iss) return;
+  const current = iss[field] || '';
+  const newVal = prompt(`Edit ${label}:`, current);
+  if (newVal === null) return;
+  const trimmed = newVal.trim();
+  if (trimmed === current) return;
+  iss[field] = trimmed;
+  iss.updatedAt = new Date().toISOString();
+  iss.log.push({
+    type: 'note',
+    author: 'User',
+    date: iss.updatedAt,
+    text: `Updated ${label}${trimmed ? ': ' + trimmed : ' (cleared)'}`
+  });
+  saveState();
+  renderDetail(iss);
+  toast(`${label} updated`);
+}
+
+function changeStatus(issueId, newStatus) {
+  const iss = state.issues.find(i => i.id === issueId);
+  if (!iss || iss.status === newStatus) return;
+  const old = iss.status;
+  iss.status = newStatus;
+  iss.updatedAt = new Date().toISOString();
+  iss.log.push({
+    type: 'status',
+    author: 'User',
+    date: iss.updatedAt,
+    text: `Status changed: ${old} → ${newStatus}`
+  });
+  saveState();
+  renderDetail(iss);
+  toast(`Status updated to ${newStatus}`);
+}
+
+function addLogEntry(issueId) {
+  const iss = state.issues.find(i => i.id === issueId);
+  if (!iss) return;
+  const text = document.getElementById('updateText').value.trim();
+  const author = document.getElementById('updateAuthor').value.trim() || 'Anonymous';
+  if (!text) { toast('Nothing to add'); return; }
+  const now = new Date().toISOString();
+  iss.log.push({ type: 'note', author, date: now, text });
+  iss.updatedAt = now;
+  saveState();
+  renderDetail(iss);
+  toast('Update added');
+}
+
+function renderLogEntry(entry) {
+  return `
+    <div class="log-entry">
+      <div class="log-dot ${entry.type}"></div>
+      <div class="log-body">
+        <div class="log-meta">${escapeHtml(entry.author)} · ${formatDateTime(entry.date)}</div>
+        <div class="log-text ${entry.type === 'created' ? 'subtle' : ''}">${escapeHtml(entry.text)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function isoProgress(i) {
+  const steps = [
+    { k: 'Describe', done: !!i.description },
+    { k: 'Contain', done: !!i.containment },
+    { k: 'Root Cause', done: !!i.rootCause },
+    { k: 'Corrective Action', done: !!i.correctiveAction },
+    { k: 'Verify', done: !!i.verification },
+  ];
+  return steps.map((s, idx) => `
+    <div style="display:flex; justify-content:space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <span>${idx + 1}. ${s.k}</span>
+      <span style="color: ${s.done ? '#6fd38c' : 'rgba(255,255,255,0.4)'};">${s.done ? '✓' : '○'}</span>
+    </div>
+  `).join('');
+}
+
+function confirmDelete(id) {
+  const iss = state.issues.find(i => i.id === id);
+  if (!iss) return;
+  openModal(`Delete ${iss.displayId}?`, `This will permanently remove this issue and its entire log. This cannot be undone.`, () => {
+    state.issues = state.issues.filter(i => i.id !== id);
+    saveState();
+    toast(`${iss.displayId} deleted`);
+    nav('tracker');
+  });
+}
+
+// ============ HELPERS ============
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+    ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+function relativeDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const diff = (Date.now() - d) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  if (diff < 86400*7) return `${Math.floor(diff/86400)}d ago`;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// ============ TOAST ============
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ============ MODAL ============
+function openModal(title, body, onConfirm) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').textContent = body;
+  document.getElementById('modalBackdrop').classList.add('show');
+  document.getElementById('modalConfirm').onclick = () => { onConfirm(); closeModal(); };
+}
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('show');
+}
+
+// ============ DATA MANAGEMENT ============
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `leightner-hub-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Data exported');
+}
+
+function importData() {
+  document.getElementById('fileInput').click();
+}
+
+function handleFileImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.issues || !Array.isArray(data.issues)) throw new Error('Bad format');
+      openModal('Replace all data?', `This will replace current data with ${data.issues.length} issue(s) from the file. Export your current data first if you want a backup.`, () => {
+        state = data;
+        saveState();
+        toast('Data imported');
+        nav('hub');
+      });
+    } catch (err) {
+      toast('Import failed: bad file');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function confirmReset() {
+  openModal('Reset all data?', 'This will delete every issue and all activity logs permanently. Export first if you want a backup.', () => {
+    state = { issues: [], nextId: 1 };
+    saveState();
+    toast('All data cleared');
+    nav('hub');
+  });
+}
+
+// ============ DEMO DATA ============
+function seedDemoData() {
+  if (state.issues.length > 0) {
+    openModal('Load examples?', 'This will add 2 example issues (Stycast bubbles + bobbin wind). Your existing issues will be kept.', doSeed);
+  } else {
+    doSeed();
+  }
+  function doSeed() {
+    const now = new Date();
+    const daysAgo = d => new Date(now.getTime() - d*86400000).toISOString();
+    const year = now.getFullYear();
+
+    const ex1 = {
+      id: state.nextId++,
+      displayId: `LEI-${year}-${String(state.nextId - 1).padStart(4, '0')}`,
+      title: 'Stycast 2850 FT Blue potting — 30–50% of castings showing bubbles',
+      reportedBy: 'Shop Floor',
+      dateReported: daysAgo(12).split('T')[0],
+      category: 'Production / Process',
+      severity: 'High',
+      relatedJob: '',
+      partNumber: 'Stycast 2850 FT Blue',
+      description: 'When we pour potting into coil molds, 30 to 50 percent of finished castings show small bubbles. This was not a problem previously. Change appears to have started in the last few months. Affects multiple coil types across jobs.',
+      containment: 'Inspecting every casting post-cure. Visibly defective parts held for review.',
+      rootCause: '',
+      correctiveAction: '',
+      verification: '',
+      status: 'Investigating',
+      createdAt: daysAgo(12),
+      updatedAt: daysAgo(2),
+      log: [
+        { type: 'created', author: 'Shop Floor', date: daysAgo(12), text: 'Issue logged.' },
+        { type: 'status', author: 'Shop Floor', date: daysAgo(12), text: 'Status set to Contained. Inspecting every casting post-cure.' },
+        { type: 'note', author: 'Engineering', date: daysAgo(9), text: 'Checked mix ratio and cure schedule against datasheet — both within spec. Pulling lot numbers of last 3 resin shipments to compare against issue onset.' },
+        { type: 'status', author: 'Engineering', date: daysAgo(7), text: 'Status changed: Contained → Investigating' },
+        { type: 'note', author: 'Engineering', date: daysAgo(4), text: 'Tried extending vacuum degas step from 5 to 15 minutes on one batch. Bubble rate dropped but did not eliminate. Suggests air entrainment during mixing OR moisture in resin. Will check lot humidity exposure next.' },
+        { type: 'note', author: 'Shop Floor', date: daysAgo(2), text: 'Noted: current resin lot was opened ~6 weeks ago. Storage area near exterior door — humidity may be a factor. Ordered fresh lot for comparison test.' },
+      ]
+    };
+
+    const ex2 = {
+      id: state.nextId++,
+      displayId: `LEI-${year}-${String(state.nextId - 1).padStart(4, '0')}`,
+      title: 'Wet-wound bobbin — rows 3+ only fitting 79 turns instead of 80',
+      reportedBy: 'Winding Tech',
+      dateReported: daysAgo(5).split('T')[0],
+      category: 'Production / Process',
+      severity: 'Medium',
+      relatedJob: '',
+      partNumber: 'Bobbin P/N (TBD) · wet wind, 80 turns/row',
+      description: 'Wet winding this bobbin: some units wind fine through all rows. On others, by the third or fourth row of an 80-turn layer, only 79 or fewer turns will fit. Same wire, same operator, same machine. Suggests either bobbin dimensional variation (lot-to-lot) or wire diameter drift, or a wet-wind tension/lubrication inconsistency.',
+      containment: 'Measuring bobbin flange-to-flange dimension before winding and recording. Setting aside out-of-tolerance bobbins.',
+      rootCause: '',
+      correctiveAction: '',
+      verification: '',
+      status: 'Contained',
+      createdAt: daysAgo(5),
+      updatedAt: daysAgo(1),
+      log: [
+        { type: 'created', author: 'Winding Tech', date: daysAgo(5), text: 'Issue logged.' },
+        { type: 'status', author: 'Winding Tech', date: daysAgo(5), text: 'Status set to Contained. Measuring bobbin dimension pre-wind.' },
+        { type: 'note', author: 'Winding Tech', date: daysAgo(1), text: 'Measured 20 bobbins today — about 15% are 0.01–0.02" narrower in the winding window than nominal. Correlates with the units that come up short. Pulling supplier info and last 3 PO lot numbers next.' },
+      ]
+    };
+
+    state.issues.push(ex1, ex2);
+    saveState();
+    toast('2 example issues loaded');
+    renderTracker();
+  }
+}
+
+// ============ INIT ============
+function init() {
+  const now = new Date();
+  document.getElementById('headerDate').textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  nav('hub');
+}
+init();
+</script>
+
+</body>
+</html>
