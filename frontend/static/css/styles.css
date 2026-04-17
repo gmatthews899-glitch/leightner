@@ -1,0 +1,137 @@
+:root {
+  --ink: #1a1a1a;
+  --paper: #f7f7f5;
+  --surface: #ffffff;
+  --line: #d4d4d1;
+  --line-soft: #e8e7e2;
+  --steel: #6b6b68;
+  --navy: #1f3a5f;
+  --navy-deep: #15283f;
+  --accent: #d1703c;
+  --accent-soft: #f3e0d4;
+  --danger: #a83232;
+  --danger-soft: #ecd5d5;
+  --ok: #3e7a4e;
+
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.site-header {
+  padding: 14px 32px;
+  background: var(--navy);
+  color: #f7f7f5;
+}
+
+.site-header__title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+footer {
+  padding: 24px 32px;
+  border-top: 1px solid var(--line);
+  color: var(--steel);
+  font-size: 12.5px;
+}
+
+h1 {
+  margin: 0 0 24px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-collapse: collapse;
+  background: var(--surface);
+}
+
+thead th {
+  padding: 10px 14px;
+  background: var(--navy);
+  color: #f7f7f5;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+thead th[data-sort="asc"]::after {
+  content: " ▲";
+}
+
+thead th[data-sort="desc"]::after {
+  content: " ▼";
+}
+
+tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 13.5px;
+  vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(232, 231, 226, 0.4);
+}
+
+tbody tr:hover {
+  background: var(--paper);
+}
+
+tbody tr.recently-updated {
+  background: var(--accent-soft);
+}
+
+tbody tr.recently-updated td:first-child {
+  border-left: 3px solid var(--accent);
+}
+
+tbody tr.recently-updated td:nth-child(10) {
+  font-weight: 600;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.credit-hold-yes {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.dim {
+  color: var(--steel);
+}
+
+.empty-state {
+  padding: 80px 0;
+  color: var(--steel);
+  font-size: 15px;
+  text-align: center;
+}

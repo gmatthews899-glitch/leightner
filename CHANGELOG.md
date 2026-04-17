@@ -6,6 +6,100 @@ All agents must read this file at the start of every session and append an entry
 
 ---
 
+## 2026-04-17 — Added Orders HTML list view
+**Agent:** Codex
+**Session summary:** The operator asked for Step 5 of the Orders feature only: add the read-only HTML list page at `/orders`, plus the base template, styling, sorter script, and page-route wiring. Create/edit UI is intentionally deferred.
+
+**Files created:**
+- `backend/routes/orders_pages.py`
+- `frontend/templates/base.html`
+- `frontend/templates/orders/list.html`
+- `frontend/static/css/styles.css`
+- `frontend/static/js/orders-list.js`
+
+**Files modified:**
+- `backend/main.py` — mounted `/static` and registered the Orders HTML page router while leaving the lifespan, health check, and JSON API wiring intact
+- `CHANGELOG.md` — appended this session entry at the top in the required format
+
+**Files deleted:**
+- none
+
+**Dependencies added:**
+- none
+
+**Verified by:**
+- Activated the project venv and confirmed Python version:
+  - `source .venv/bin/activate`
+  - `python --version`
+  - Output: `Python 3.12.13`
+- Started the server without reload:
+  - `uvicorn backend.main:app --port 8000`
+  - Output included:
+    - `INFO:     Started server process [58431]`
+    - `INFO:     Waiting for application startup.`
+    - `INFO:     Application startup complete.`
+    - `INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)`
+- Seeded three verification orders sequentially through the existing JSON API:
+  - `curl -s -X POST http://127.0.0.1:8000/api/orders -H "Content-Type: application/json" -d '{"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-2026-001","item_number":"P-A100","description":"Inductor assembly, primary","ship_qty":5,"backorder_qty":10,"estimated_ship_date":"2026-05-15"}'`
+  - Output: `{"id":1,"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-2026-001","item_number":"P-A100","description":"Inductor assembly, primary","ship_qty":5,"backorder_qty":10,"total_qty":15,"estimated_ship_date":"2026-05-15","notes":null,"created_at":"2026-04-17T18:20:35","updated_at":"2026-04-17T18:20:35","updated_by":null}`
+  - `curl -s -X POST http://127.0.0.1:8000/api/orders -H "Content-Type: application/json" -d '{"customer_code":"NASA","customer_name":"NASA Goddard","credit_hold":true,"sales_order_number":"SO-2026-002","item_number":"P-B200","description":"High-rel transformer, space grade","ship_qty":0,"backorder_qty":3,"estimated_ship_date":"2026-06-01"}'`
+  - Output: `{"id":2,"customer_code":"NASA","customer_name":"NASA Goddard","credit_hold":true,"sales_order_number":"SO-2026-002","item_number":"P-B200","description":"High-rel transformer, space grade","ship_qty":0,"backorder_qty":3,"total_qty":3,"estimated_ship_date":"2026-06-01","notes":null,"created_at":"2026-04-17T18:20:41","updated_at":"2026-04-17T18:20:41","updated_by":null}`
+  - `curl -s -X POST http://127.0.0.1:8000/api/orders -H "Content-Type: application/json" -d '{"customer_code":"RAYTH","customer_name":"Raytheon","credit_hold":false,"sales_order_number":"SO-2026-003","item_number":"P-C300","description":"RF choke, shielded","ship_qty":12,"backorder_qty":0,"estimated_ship_date":null}'`
+  - Output: `{"id":3,"customer_code":"RAYTH","customer_name":"Raytheon","credit_hold":false,"sales_order_number":"SO-2026-003","item_number":"P-C300","description":"RF choke, shielded","ship_qty":12,"backorder_qty":0,"total_qty":12,"estimated_ship_date":null,"notes":null,"created_at":"2026-04-17T18:20:46","updated_at":"2026-04-17T18:20:46","updated_by":null}`
+- Fetched the Orders HTML page and captured the first section of output:
+  - `curl -s http://127.0.0.1:8000/orders | sed -n '1,80p'`
+  - Output started with:
+    - `<!doctype html>`
+    - `<html lang="en">`
+    - `<title>Orders — Leightner Electronics Inc.</title>`
+    - `<h1>Orders</h1>`
+    - table headers for `Cust Code`, `Name`, `CrHld`, `SO#`, `Item Number`, `Description`, `Ship Qty`, `BO Qty`, `Tot Qty`, `Est Ship`
+    - `class="recently-updated"` rows
+    - `Raytheon`, `NASA Goddard`, `SO-2026-003`, `SO-2026-002`
+    - `<span class="pill credit-hold-yes">Yes</span>` for NASA
+    - `<span class="dim">—</span>` for Raytheon's null estimated ship date
+  - `curl -s http://127.0.0.1:8000/orders | sed -n '81,120p'`
+  - Output included:
+    - `SO-2026-001`
+    - `Inductor assembly, primary`
+    - `May 15, 2026`
+    - `<script src="/static/js/orders-list.js"></script>`
+    - closing footer/body/html tags
+- Verified static assets are served:
+  - `curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8000/static/css/styles.css`
+  - Output: `HTTP 200`
+  - `curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8000/static/js/orders-list.js`
+  - Output: `HTTP 200`
+- Cleaned up the three verification rows by their actual returned IDs:
+  - `curl -s -X DELETE http://127.0.0.1:8000/api/orders/1`
+  - Output: empty body
+  - `curl -s -X DELETE http://127.0.0.1:8000/api/orders/2`
+  - Output: empty body
+  - `curl -s -X DELETE http://127.0.0.1:8000/api/orders/3`
+  - Output: empty body
+  - `curl -s http://127.0.0.1:8000/api/orders`
+  - Output: `[]`
+- Stopped the server cleanly with `Ctrl+C`:
+  - Output included:
+    - `INFO:     Shutting down`
+    - `INFO:     Waiting for application shutdown.`
+    - `INFO:     Application shutdown complete.`
+    - `INFO:     Finished server process [58431]`
+
+**Decisions made during this session:**
+- Put the Jinja2 template engine in `backend/routes/orders_pages.py` instead of `main.py` to keep the app assembly file cleaner, matching the clarified task direction.
+- Computed `recently_updated` in Python per row before rendering so the template stays simple and the highlight logic does not rely on JavaScript.
+
+**What was NOT done / deferred:**
+- This step added the HTML list view only
+- No create/edit/delete buttons, forms, or page-level actions were added
+- No hub page or global navigation was added
+- No authentication was added
+- The existing JSON API in `backend/routes/orders.py` was left untouched
+
+**Next suggested step:**
+- Build the next Orders UI step: create/edit pages and form handling, while reusing the existing service layer and JSON/API behavior.
+
 ## 2026-04-17 — Added Orders JSON API routes and registered router
 **Agent:** Codex
 **Session summary:** The operator asked for Steps 3 and 4 of the Orders feature only: add JSON API routes in `backend/routes/orders.py` and register that router in `backend/main.py`.

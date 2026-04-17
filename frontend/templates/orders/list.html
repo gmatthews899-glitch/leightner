@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Orders — Leightner Electronics Inc.{% endblock %}
+
+{% block content %}
+  <h1>Orders</h1>
+
+  {% if not orders %}
+    <div class="empty-state">No orders yet.</div>
+  {% else %}
+    <div class="table-wrap">
+      <table data-orders-table>
+        <thead>
+          <tr>
+            <th data-column="customer_code">Cust Code</th>
+            <th data-column="customer_name">Name</th>
+            <th data-column="credit_hold">CrHld</th>
+            <th data-column="sales_order_number">SO#</th>
+            <th data-column="item_number">Item Number</th>
+            <th data-column="description">Description</th>
+            <th data-column="ship_qty">Ship Qty</th>
+            <th data-column="backorder_qty">BO Qty</th>
+            <th data-column="total_qty">Tot Qty</th>
+            <th data-column="estimated_ship_date">Est Ship</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+            <tr{% if order.recently_updated %} class="recently-updated"{% endif %} data-updated-at="{{ order.updated_at_iso }}">
+              <td data-value="{{ order.customer_code }}">{{ order.customer_code }}</td>
+              <td data-value="{{ order.customer_name }}">{{ order.customer_name }}</td>
+              <td data-value="{% if order.credit_hold %}1{% else %}0{% endif %}">
+                {% if order.credit_hold %}
+                  <span class="pill credit-hold-yes">Yes</span>
+                {% else %}
+                  <span class="dim">—</span>
+                {% endif %}
+              </td>
+              <td data-value="{{ order.sales_order_number }}">{{ order.sales_order_number }}</td>
+              <td data-value="{{ order.item_number }}">{{ order.item_number }}</td>
+              <td data-value="{{ order.description }}">{{ order.description }}</td>
+              <td data-value="{{ order.ship_qty }}">{{ order.ship_qty }}</td>
+              <td data-value="{{ order.backorder_qty }}">{{ order.backorder_qty }}</td>
+              <td data-value="{{ order.total_qty }}">{{ order.total_qty }}</td>
+              <td data-value="{% if order.estimated_ship_date %}{{ order.estimated_ship_date.isoformat() }}{% endif %}">
+                {% if not order.estimated_ship_date %}
+                  <span class="dim">—</span>
+                {% elif order.estimated_ship_date == today_central %}
+                  <strong>Today</strong>
+                {% else %}
+                  {{ order.estimated_ship_date.strftime('%b %-d, %Y') }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+  <script src="/static/js/orders-list.js"></script>
+{% endblock %}
