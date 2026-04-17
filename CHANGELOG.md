@@ -6,6 +6,51 @@ All agents must read this file at the start of every session and append an entry
 
 ---
 
+## 2026-04-17 — Initial project scaffold
+**Agent:** Codex
+**Session summary:** The operator asked for the initial scaffold only: pinned dependencies, basic repo files, and a minimal FastAPI app with a single `/health` endpoint.
+
+**Files created:**
+- `.gitignore`
+- `requirements.txt`
+- `README.md`
+- `backend/__init__.py`
+- `backend/main.py`
+- `backend/models/__init__.py`
+- `backend/routes/__init__.py`
+- `frontend/static/css/.gitkeep`
+- `frontend/static/js/.gitkeep`
+- `data/.gitkeep`
+
+**Files modified:**
+- `CHANGELOG.md` — appended this session entry at the top in the required format
+
+**Files deleted:**
+- none
+
+**Dependencies added:**
+- none
+
+**Verified by:**
+- Operator started `uvicorn backend.main:app --reload --port 8000` and confirmed the server started cleanly with no errors.
+- Operator opened `http://127.0.0.1:8000/health` in the browser on 2026-04-17 at approximately 10:30:23 CDT and confirmed the response was `{"status":"ok"}`.
+- Operator also confirmed a `200 OK` entry in the access log. A `404` on `/favicon.ico` was observed and is expected/harmless.
+
+**Decisions made during this session:**
+- Added `.env` to `.gitignore` to comply with the project rule that secrets must never be committed.
+- Noted in `README.md` that Python 3.10 or newer is required, because the local machine currently reports Python 3.9.6.
+
+**What was NOT done / deferred:**
+- No database setup or SQLite file creation
+- No models beyond empty package markers
+- No auth code
+- No HTML files
+- No routes other than `GET /health`
+- No verification run, per operator instruction
+
+**Next suggested step:**
+- Create a Python 3.10+ virtual environment, install dependencies, run `uvicorn`, and confirm that `GET /health` returns `{"status": "ok"}` before committing.
+
 ## 2026-04-17 — Expanded AGENTS.md with operational, security, and timezone rules
 **Agent:** Claude (planning conversation)
 **Session summary:** The operator identified that the initial AGENTS.md was missing important rules. This session audited the file against real-world failure modes and added comprehensive coverage.
