@@ -2,6 +2,11 @@
 
 **Read `AGENTS.md` first. All rules in that file apply.**
 
+Before starting any task, also read:
+- `PROJECT_CONTEXT.md` — what we're building and why
+- `CHANGELOG.md` — what previous sessions (yours or other agents') have already done
+- `ARCHITECTURE.md` — how the codebase is structured and the pattern new features follow
+
 This file adds Claude-specific notes on top of the shared agent instructions.
 
 ---

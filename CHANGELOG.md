@@ -6,50 +6,38 @@ All agents must read this file at the start of every session and append an entry
 
 ---
 
-## 2026-04-17 — Initial project scaffold
-**Agent:** Codex
-**Session summary:** The operator asked for the initial scaffold only: pinned dependencies, basic repo files, and a minimal FastAPI app with a single `/health` endpoint.
+## 2026-04-17 — Added ARCHITECTURE.md and updated agent docs to reference it
+**Agent:** Claude (planning conversation)
+**Session summary:** Before starting the Orders module, the operator flagged concern that agents could introduce random new patterns. Added a new ARCHITECTURE.md file documenting the 4-layer code structure (models / services / routes / templates), the 7-step feature-addition pattern, naming conventions, and anti-patterns to avoid. Updated AGENTS.md and CLAUDE.md to require reading ARCHITECTURE.md and to protect it from accidental modification.
 
 **Files created:**
-- `.gitignore`
-- `requirements.txt`
-- `README.md`
-- `backend/__init__.py`
-- `backend/main.py`
-- `backend/models/__init__.py`
-- `backend/routes/__init__.py`
-- `frontend/static/css/.gitkeep`
-- `frontend/static/js/.gitkeep`
-- `data/.gitkeep`
+- `ARCHITECTURE.md` — new root-level doc describing code structure and patterns for new features
 
 **Files modified:**
-- `CHANGELOG.md` — appended this session entry at the top in the required format
+- `AGENTS.md` — added ARCHITECTURE.md to required reading list (now four files, not three); added ARCHITECTURE.md to the protected-files rule (#11); added it to the project structure diagram; updated workflow step 1 and the red flags list to include it.
+- `CLAUDE.md` — added ARCHITECTURE.md to the required reading list.
 
-**Files deleted:**
-- none
+**Files deleted:** none
 
-**Dependencies added:**
-- none
+**Dependencies added:** none
 
 **Verified by:**
-- Operator started `uvicorn backend.main:app --reload --port 8000` and confirmed the server started cleanly with no errors.
-- Operator opened `http://127.0.0.1:8000/health` in the browser on 2026-04-17 at approximately 10:30:23 CDT and confirmed the response was `{"status":"ok"}`.
-- Operator also confirmed a `200 OK` entry in the access log. A `404` on `/favicon.ico` was observed and is expected/harmless.
+- Visual review of ARCHITECTURE.md contents and updates to AGENTS.md and CLAUDE.md. Documentation change only — no code to run.
 
 **Decisions made during this session:**
-- Added `.env` to `.gitignore` to comply with the project rule that secrets must never be committed.
-- Noted in `README.md` that Python 3.10 or newer is required, because the local machine currently reports Python 3.9.6.
+- Orders data model design: store `customer_code` and `customer_name` directly on the Order row for MVP, rather than normalizing into a separate Customers table. Customers & Contacts module is planned as a later module; we'll migrate Orders to reference it then.
+- Orders module will use these fields matching Rusty's DBA sales order sheet: customer_code, customer_name, credit_hold, sales_order_number (unique), item_number, description, ship_qty, backorder_qty, estimated_ship_date (Date type), plus standard id/created_at/updated_at/updated_by.
+- `total_qty` will be a computed property (ship_qty + backorder_qty), not a stored column, to prevent data drift.
+- The Orders build will proceed one architectural layer at a time: model first, then service, then routes, then templates. Each layer committed separately.
 
 **What was NOT done / deferred:**
-- No database setup or SQLite file creation
-- No models beyond empty package markers
-- No auth code
-- No HTML files
-- No routes other than `GET /health`
-- No verification run, per operator instruction
+- No code changes yet
+- The `updated_by` field on Order will be a plain string for now, not a foreign key to a User table. It becomes a proper foreign key when auth/users are added in a later task.
 
 **Next suggested step:**
-- Create a Python 3.10+ virtual environment, install dependencies, run `uvicorn`, and confirm that `GET /health` returns `{"status": "ok"}` before committing.
+- Build the Orders model (Step 1 of the 7-step pattern): create `backend/database.py`, `backend/models/order.py`, update `backend/models/__init__.py`, and wire `init_db()` into `backend/main.py`. Verify the SQLite file is created on server startup and `/health` still returns `{"status":"ok"}`.
+
+---
 
 ## 2026-04-17 — Expanded AGENTS.md with operational, security, and timezone rules
 **Agent:** Claude (planning conversation)

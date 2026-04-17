@@ -2,12 +2,13 @@
 
 You are working on an internal web application for **Leightner Electronics Inc.**, a custom transformer manufacturer in McKinney, TX. The human operator of this project is **not a developer**. Treat them as the decision-maker and product owner, not as a coding partner. They will specify *what* to build; you produce the code and explain what you did.
 
-**At the start of EVERY session, before doing any work, read these three files in this order:**
+**At the start of EVERY session, before doing any work, read these four files in this order:**
 1. `PROJECT_CONTEXT.md` — business context, decisions, principles, what we're building
 2. `CHANGELOG.md` — running log of changes made by all prior agent sessions. This is your memory across sessions. If you skip this, you will repeat work or undo things another agent did.
 3. `AGENTS.md` — this file, how you work
+4. `ARCHITECTURE.md` — how the codebase is structured. Every new feature follows the pattern documented there.
 
-This `AGENTS.md` file is rules for *how you work*. `PROJECT_CONTEXT.md` is rules for *what we build*. `CHANGELOG.md` is the record of what has already been done.
+This `AGENTS.md` file is rules for *how you work*. `PROJECT_CONTEXT.md` is rules for *what we build*. `ARCHITECTURE.md` is rules for *how the code is organized*. `CHANGELOG.md` is the record of what has already been done.
 
 ---
 
@@ -44,7 +45,7 @@ Never say a task is complete without confirming the code actually works. For bac
 The SQLite file at `data/leightner.db` may contain real issues and orders once this app is used. Never delete, truncate, or re-create the database to "fix" a schema issue or "start fresh" unless the operator explicitly asks for it. If a schema change is needed on a database with data, propose an additive migration (add columns, don't drop them) and wait for approval. Loss of real data is the worst possible outcome.
 
 ### 11. Do not modify files outside the current codebase
-Specifically: `leightner-hub.html` is the original prototype and is kept as reference only. Do not modify it. Do not modify `AGENTS.md`, `CLAUDE.md`, or `PROJECT_CONTEXT.md` unless explicitly asked. `CHANGELOG.md` is append-only.
+Specifically: `leightner-hub.html` is the original prototype and is kept as reference only. Do not modify it. Do not modify `AGENTS.md`, `CLAUDE.md`, `PROJECT_CONTEXT.md`, or `ARCHITECTURE.md` unless explicitly asked. `CHANGELOG.md` is append-only.
 
 ---
 
@@ -112,6 +113,7 @@ leightner/
 ├── AGENTS.md              # This file
 ├── CLAUDE.md              # Claude-specific pointer to this file
 ├── PROJECT_CONTEXT.md     # Business context, decisions, principles
+├── ARCHITECTURE.md        # How the code is structured; patterns new features follow
 ├── CHANGELOG.md           # Running record of changes (append-only)
 ├── README.md              # How to run the project
 ├── requirements.txt       # Python dependencies (pinned)
@@ -198,7 +200,7 @@ Initial admin account: created via a one-time script or environment variables, n
 
 When the operator asks you to do something:
 
-1. **Read `PROJECT_CONTEXT.md` and `CHANGELOG.md` first** if you haven't this session. The changelog tells you what previous sessions (you or other agents) already did — do not repeat or undo that work.
+1. **Read `PROJECT_CONTEXT.md`, `CHANGELOG.md`, and `ARCHITECTURE.md` first** if you haven't this session. The changelog tells you what previous sessions (you or other agents) already did — do not repeat or undo that work. Architecture tells you how to structure new code.
 2. **Summarize what you understand** the task to be, in one or two sentences
 3. **List the files you will create or modify** — explicitly, by path
 4. **List what you will NOT touch** — explicitly, to show you understand the scope
@@ -315,7 +317,7 @@ Anything outside this scope goes on the someday list in `PROJECT_CONTEXT.md`.
 
 ## Red flags — stop and ask if you see these
 
-- You are about to start work without having read `CHANGELOG.md` and `PROJECT_CONTEXT.md` this session
+- You are about to start work without having read `CHANGELOG.md`, `PROJECT_CONTEXT.md`, and `ARCHITECTURE.md` this session
 - You are about to install more than one new library
 - You are about to modify a file that wasn't in the current task
 - You are about to run a database migration that changes existing columns

@@ -2,7 +2,7 @@
 
 **Last updated:** April 17, 2026
 **Maintainer:** [Your name]
-**Status:** Phase 0 — prototype built, Rusty has seen an informal preview, formal demo pending
+**Status:** Phase 1 — Rusty has formally approved the direction. Real build in progress. Scaffolding complete; Orders module next.
 
 ---
 
@@ -25,7 +25,7 @@ Current state of operations: largely paper-based, shared OneDrive for files, no 
 - Rusty runs a shipping schedule report regularly to know what's due and when
 - Key limitation: when a sales order due date changes, the work order does not automatically update. Rusty tracks the real due date in the sales order only. Work packets printed at job creation show the original date, which quickly becomes stale.
 - Not user-friendly. Rusty describes it as having "8 million spices" — it can do a lot but doesn't tell you how.
-- **Integration plan: none for now.** Active Jobs data will be entered manually. DBA-to-hub automation is a future consideration, not current scope. We are not blocking on this.
+- **Integration plan: none for now.** Orders data will be entered manually. DBA-to-hub automation is a future consideration, not current scope. We are not blocking on this.
 
 ---
 
@@ -47,8 +47,8 @@ A central hub that acts as the front door to multiple internal tools. Modular �
 
 | # | Module | Status | Notes |
 |---|--------|--------|-------|
-| 1 | Issue & Corrective Action Tracker | Prototype built | Rusty informal preview done. Formal demo pending. |
-| 2 | Active Jobs | Planned — next after module 1 ships | See spec below |
+| 1 | Issue & Corrective Action Tracker | Prototype approved by Rusty | Ported to real app as part of Phase 1 build. |
+| 2 | Orders | In progress — scaffolding done, model layer next | Renamed from "Active Jobs" per Rusty terminology. See spec below. |
 | 3 | Customers & Contacts | Planned | Order not locked |
 | 4 | Documents & SOPs | Planned | Order not locked |
 | 5 | Reports & Metrics | Planned | Order not locked |
@@ -86,14 +86,14 @@ Fields are an educated guess pending Rusty's formal review.
 
 ---
 
-### Module 2: Active Jobs
+### Module 2: Orders
 
 **The core problem it solves:** Job due dates change constantly. The shop floor works off paper work packets printed at job creation — those dates go stale immediately. Operators are working jobs based on wrong due dates. Rusty is the only person who knows what's really due when. The result: wrong prioritization, last-minute scrambles, operators feeling like they let the company down when the real problem was bad information.
 
 **Rusty's words (04/17):** "If I had a system where I update the sales order due date and it's readily available — an operator could look it up and go, okay, when's that one really due?" And: "That's probably one of the easiest things we could build, honestly."
 
 **What this module is:**
-A simple list of open jobs with a single due date per job that Rusty can update any time. Live, accurate, accessible to everyone on the floor. That's it.
+A simple list of open sales orders with a single estimated ship date per order that Rusty can update any time. Live, accurate, accessible to everyone on the floor. That's it.
 
 **What it is NOT:**
 - Not a replacement for DBA
@@ -102,20 +102,29 @@ A simple list of open jobs with a single due date per job that Rusty can update 
 - Not automated (manually maintained for now — DBA sync is a someday item)
 
 **Key behavior:**
-- When a date changes, the row highlights for 24 hours so operators know something changed
-- Operators look up a job by work order number and see the real current due date
+- When the estimated ship date changes, the row highlights for 24 hours so operators know something changed
+- Operators look up an order by sales order number and see the real current ship date
 - Rusty or a designee updates dates manually when they change in DBA
 
-**Proposed fields (to confirm with Rusty):**
-- Job / work order number (from DBA)
-- Customer name
-- Part description
-- Quantity ordered / quantity building (may differ — Rusty sometimes builds extra for yield)
-- Due date (the real one, manually maintained)
-- Stage (needs Rusty input — Winding? Potting? Test? Ship?)
-- Notes (free text)
-- Last updated timestamp + who updated
-- Recently-changed flag (drives 24-hour highlight behavior)
+**Fields (from Rusty's DBA sales order sheet, confirmed 04/17):**
+- `customer_code` — DBA's short code for the customer (e.g. LMCO)
+- `customer_name` — full name (e.g. Lockheed Martin)
+- `credit_hold` — boolean flag from DBA ("CrHld" column)
+- `sales_order_number` — DBA's SO#, unique identifier
+- `item_number` — Leightner's internal part number
+- `description` — part description
+- `ship_qty` — quantity already shipped
+- `backorder_qty` — quantity still owed (BO Qty)
+- `total_qty` — computed property (ship + backorder), not stored
+- `estimated_ship_date` — the date Rusty maintains (DATE type, not DATETIME)
+- `notes` — free text
+- `updated_by` — who last changed the row (plain string in MVP; becomes FK to User later)
+- `id`, `created_at`, `updated_at` — standard columns; timestamps in UTC
+
+**Design decisions (04/17):**
+- Customer info is denormalized — stored directly on each Order row, not referenced via a Customers table. When the Customers & Contacts module is built, we'll migrate Orders to reference it. Premature normalization now would be wasted work.
+- `total_qty` is computed, not stored, to prevent it drifting out of sync with ship_qty + backorder_qty.
+- `updated_by` is a plain string for now. It becomes a proper foreign key when auth/users are added.
 
 ---
 
@@ -156,7 +165,7 @@ Structure data so certification records exist if ever pursued. Don't announce it
 Plain sans-serif, sentence case, practical labels. No decorative elements. No clever copy.
 
 ### 8. Manual before automated
-When there's a choice between "works now, manually" and "works later, automatically," ship manual first. Applies directly to DBA integration — Active Jobs starts as manual entry.
+When there's a choice between "works now, manually" and "works later, automatically," ship manual first. Applies directly to DBA integration — Orders starts as manual entry.
 
 ---
 
@@ -208,8 +217,8 @@ Antigravity should never get open-ended goals. Every prompt specifies: which fil
 
 ## Honest assessment of where we are
 
-- **Prototype:** built and functional. Rusty saw an informal preview 04/17, responded positively.
-- **Next gate:** formal demo with Rusty, get explicit green light to move to real build
+- **Prototype:** built and functional. Rusty saw it 04/17 and formally approved the direction.
+- **Current phase:** Phase 1 build in progress. FastAPI scaffolding committed, /health endpoint verified. Orders module is next.
 - **ISO coverage:** ~5–8% of ISO 9001 / AS9100 requirements (Corrective Action clause 10.2, partial Monitoring clause 9.1). Full certification is 12–18 months with a consultant. Not the current goal.
 - **Biggest risk:** initiative fizzles because Rusty loses patience or nobody uses what we build. Mitigation: ship fast, get feedback early, never build infrastructure before user validation.
 
@@ -219,7 +228,7 @@ Antigravity should never get open-ended goals. Every prompt specifies: which fil
 
 Deliberately deferred. Don't touch until current module is done and in use.
 
-- DBA → Active Jobs automated sync
+- DBA → Orders automated sync
 - AI-assisted root cause suggestions on issues (watch API costs carefully)
 - Mobile-optimized views for shop floor tablets
 - Notifications when issue status changes
@@ -242,14 +251,19 @@ Deliberately deferred. Don't touch until current module is done and in use.
 | 2026-04-17 | Active Jobs will use manual entry, not DBA integration | Ship something useful now; automate later |
 | 2026-04-17 | ERP confirmed: DBA | Rusty showed DBA in 04/17 conversation |
 | 2026-04-17 | Deployment via local IT consultant | Non-developer shouldn't also be sysadmin; one-time cost, zero recurring |
+| 2026-04-17 | Module 2 renamed from "Active Jobs" to "Orders" | Matches Rusty's actual terminology and DBA's sales order sheet |
+| 2026-04-17 | Orders fields match Rusty's DBA sales order sheet exactly | Design from source material, not from our guesses |
+| 2026-04-17 | Orders stores customer_code and customer_name denormalized (no Customers table yet) | Premature normalization. Will migrate when Customers & Contacts module is built |
+| 2026-04-17 | total_qty is a computed property, not a stored column | Prevents drift between ship_qty + backorder_qty and total |
+| 2026-04-17 | updated_by is a plain string for now, becomes foreign key when auth exists | Unblocks Orders build without requiring auth to be built first |
+| 2026-04-17 | Added ARCHITECTURE.md documenting 4-layer code structure and 7-step feature pattern | Prevents agents from inventing new patterns; every new feature follows the same template |
 
 ---
 
 ## Open questions / still needs Rusty input
 
 - Exact field set for issues — current set is an educated guess
-- What job stages exist at Leightner? (For Active Jobs "stage" field)
 - Who can log issues — proposed: everyone including floor techs on a shared machine
 - What does "High severity" mean at Leightner specifically?
-- Who updates Active Jobs dates when DBA changes? (Rusty? An admin?)
+- Who updates Orders estimated ship dates when DBA changes? (Rusty? An admin?)
 - Any fields or concepts missing that he'd expect to see?
