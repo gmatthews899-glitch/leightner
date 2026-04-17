@@ -6,6 +6,60 @@ All agents must read this file at the start of every session and append an entry
 
 ---
 
+## 2026-04-17 — Added Orders service layer
+**Agent:** Codex
+**Session summary:** The operator asked for Step 2 of the Orders feature only: add the Orders service functions without building routes, templates, or changing app wiring.
+
+**Files created:**
+- `backend/services/__init__.py`
+- `backend/services/order_service.py`
+
+**Files modified:**
+- `CHANGELOG.md` — appended this session entry at the top in the required format
+
+**Files deleted:**
+- `/tmp/verify_service.py` — temporary verification script used for this task only, not part of the repo
+
+**Dependencies added:**
+- none
+
+**Verified by:**
+- Activated the project venv and confirmed Python version:
+  - `source .venv/bin/activate`
+  - `python --version`
+  - Output: `Python 3.12.13`
+- Initial verification attempt:
+  - `python /tmp/verify_service.py`
+  - Output: `ModuleNotFoundError: No module named 'backend'`
+  - Cause: the script lived in `/tmp`, so Python did not include the project root on its import path.
+- Re-ran verification from the project root with the import path set explicitly:
+  - `PYTHONPATH=. python /tmp/verify_service.py`
+  - Output:
+    - `Orders before: 0`
+    - `Created order id=1, total_qty=15`
+    - `Fetched by id: VERIFY-001`
+    - `Fetched by SO#: P-TEST-01`
+    - `Updated ship_qty: 15, total_qty: 25`
+    - `Orders after create: 1`
+    - `Duplicate correctly rejected: Sales order number already exists`
+    - `Deleted test order: True`
+    - `Orders after cleanup: 0`
+- Deleted the temporary verification script afterward:
+  - `rm /tmp/verify_service.py`
+
+**Decisions made during this session:**
+- Used SQLAlchemy 2.x `select(Order)` queries in the service layer to match the current project style.
+- Filtered create/update input through explicit allowed-field sets so ignored keys such as `id`, `created_at`, and `sales_order_number` on update are silently skipped instead of mutating protected fields.
+
+**What was NOT done / deferred:**
+- No routes were created under `backend/routes/`
+- No templates or frontend files were created
+- No changes were made to `backend/main.py`, `backend/database.py`, or the Order model
+- No seed data was added to the database
+
+**Next suggested step:**
+- Build Step 3 of the Orders pattern next: `backend/routes/orders.py`, keeping route handlers thin and calling the new service functions instead of touching the database directly.
+
 ## 2026-04-17 — Added Orders model layer and database initialization
 **Agent:** Codex
 **Session summary:** The operator asked for Step 1 of the Orders feature only: add the database setup, create the `Order` SQLAlchemy model, and initialize the database on app startup without building services, routes, or templates.
