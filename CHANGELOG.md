@@ -6,6 +6,66 @@ All agents must read this file at the start of every session and append an entry
 
 ---
 
+## 2026-04-17 — Added Orders model layer and database initialization
+**Agent:** Codex
+**Session summary:** The operator asked for Step 1 of the Orders feature only: add the database setup, create the `Order` SQLAlchemy model, and initialize the database on app startup without building services, routes, or templates.
+
+**Files created:**
+- `backend/database.py`
+- `backend/models/order.py`
+
+**Files modified:**
+- `backend/models/__init__.py` — re-exported `Base` from `backend.database`
+- `backend/main.py` — added FastAPI lifespan startup initialization and imported the Orders model so `create_all()` registers the table
+- `CHANGELOG.md` — appended this session entry at the top in the required format
+
+**Files deleted:**
+- none
+
+**Dependencies added:**
+- none
+
+**Verified by:**
+- Activated the project venv and confirmed Python version:
+  - `source .venv/bin/activate`
+  - `python --version`
+  - Output: `Python 3.12.13`
+- Started the server without reload, per operator instruction:
+  - `uvicorn backend.main:app --port 8000`
+  - Output included:
+    - `INFO:     Started server process [53965]`
+    - `INFO:     Waiting for application startup.`
+    - `INFO:     Application startup complete.`
+    - `INFO:     Uvicorn running on http://127.0.0.1:8000`
+- Hit the health endpoint from a separate process:
+  - `curl http://127.0.0.1:8000/health`
+  - Output: `{"status":"ok"}`
+  - Server log output: `127.0.0.1:53265 - "GET /health HTTP/1.1" 200 OK`
+- Confirmed the SQLite database file was created and is non-zero bytes:
+  - `ls -la data/`
+  - Output included: `-rw-r--r--@  1 gavinmatthews  staff  16384 Apr 17 12:08 leightner.db`
+- Stopped the server cleanly:
+  - Sent `Ctrl+C`
+  - Output included:
+    - `INFO:     Shutting down`
+    - `INFO:     Waiting for application shutdown.`
+    - `INFO:     Application shutdown complete.`
+    - `INFO:     Finished server process [53965]`
+
+**Decisions made during this session:**
+- Added `connect_args={"check_same_thread": False}` to the SQLite engine so the FastAPI app can safely use SQLAlchemy sessions with SQLite in this setup.
+- Kept `updated_by` as a plain nullable string exactly as planned in the architecture and changelog decisions, without introducing a user relationship early.
+
+**What was NOT done / deferred:**
+- No `backend/services/` files were created
+- No routes were added under `backend/routes/`
+- No templates or frontend files were created
+- No seed data was written
+- No `User` or `Issue` models were created
+
+**Next suggested step:**
+- Build Step 2 of the Orders pattern next: `backend/services/order_service.py` with the Orders query and write functions, keeping routes and templates for later tasks.
+
 ## 2026-04-17 — Added ARCHITECTURE.md and updated agent docs to reference it
 **Agent:** Claude (planning conversation)
 **Session summary:** Before starting the Orders module, the operator flagged concern that agents could introduce random new patterns. Added a new ARCHITECTURE.md file documenting the 4-layer code structure (models / services / routes / templates), the 7-step feature-addition pattern, naming conventions, and anti-patterns to avoid. Updated AGENTS.md and CLAUDE.md to require reading ARCHITECTURE.md and to protect it from accidental modification.
