@@ -6,6 +6,85 @@ All agents must read this file at the start of every session and append an entry
 
 ---
 
+## 2026-04-17 — Added Orders JSON API routes and registered router
+**Agent:** Codex
+**Session summary:** The operator asked for Steps 3 and 4 of the Orders feature only: add JSON API routes in `backend/routes/orders.py` and register that router in `backend/main.py`.
+
+**Files created:**
+- `backend/routes/orders.py`
+
+**Files modified:**
+- `backend/main.py` — imported and registered the Orders router while keeping the lifespan and `/health` endpoint unchanged
+- `CHANGELOG.md` — appended this session entry at the top in the required format
+
+**Files deleted:**
+- none
+
+**Dependencies added:**
+- none
+
+**Verified by:**
+- Activated the project venv and confirmed Python version:
+  - `source .venv/bin/activate`
+  - `python --version`
+  - Output: `Python 3.12.13`
+- Started the server without reload:
+  - `uvicorn backend.main:app --port 8000`
+  - Output included:
+    - `INFO:     Started server process [57117]`
+    - `INFO:     Waiting for application startup.`
+    - `INFO:     Application startup complete.`
+    - `INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)`
+- Ran the API checks sequentially, one command at a time:
+  - `curl -s http://127.0.0.1:8000/api/orders`
+  - Output: `[]`
+  - `curl -s -X POST http://127.0.0.1:8000/api/orders -H "Content-Type: application/json" -d '{"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-TEST-001","item_number":"P-100","description":"Test widget","ship_qty":5,"backorder_qty":10}'`
+  - Output: `{"id":1,"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-TEST-001","item_number":"P-100","description":"Test widget","ship_qty":5,"backorder_qty":10,"total_qty":15,"estimated_ship_date":null,"notes":null,"created_at":"2026-04-17T17:51:09","updated_at":"2026-04-17T17:51:09","updated_by":null}`
+  - `curl -s http://127.0.0.1:8000/api/orders/1`
+  - Output: `{"id":1,"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-TEST-001","item_number":"P-100","description":"Test widget","ship_qty":5,"backorder_qty":10,"total_qty":15,"estimated_ship_date":null,"notes":null,"created_at":"2026-04-17T17:51:09","updated_at":"2026-04-17T17:51:09","updated_by":null}`
+  - `curl -s -X PUT http://127.0.0.1:8000/api/orders/1 -H "Content-Type: application/json" -d '{"ship_qty":20,"notes":"Updated via API test"}'`
+  - Output: `{"id":1,"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-TEST-001","item_number":"P-100","description":"Test widget","ship_qty":20,"backorder_qty":10,"total_qty":30,"estimated_ship_date":null,"notes":"Updated via API test","created_at":"2026-04-17T17:51:09","updated_at":"2026-04-17T17:53:54","updated_by":null}`
+  - `curl -s -w "\nHTTP %{http_code}\n" -X POST http://127.0.0.1:8000/api/orders -H "Content-Type: application/json" -d '{"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-TEST-001","item_number":"P-200","description":"Duplicate","ship_qty":0,"backorder_qty":0}'`
+  - Output:
+    - `{"detail":"Sales order number already exists"}`
+    - `HTTP 409`
+  - `curl -s http://127.0.0.1:8000/api/orders`
+  - Output: `[{"id":1,"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-TEST-001","item_number":"P-100","description":"Test widget","ship_qty":20,"backorder_qty":10,"total_qty":30,"estimated_ship_date":null,"notes":"Updated via API test","created_at":"2026-04-17T17:51:09","updated_at":"2026-04-17T17:53:54","updated_by":null}]`
+  - `curl -s -w "HTTP %{http_code}\n" -X DELETE http://127.0.0.1:8000/api/orders/1`
+  - Output: `HTTP 204`
+  - `curl -s -w "\nHTTP %{http_code}\n" http://127.0.0.1:8000/api/orders/1`
+  - Output:
+    - `{"detail":"Order not found"}`
+    - `HTTP 404`
+- Server log for the successful sequential verification showed the expected statuses:
+  - `GET /api/orders` → `200 OK`
+  - `POST /api/orders` → `201 Created`
+  - `GET /api/orders/1` → `200 OK`
+  - `PUT /api/orders/1` → `200 OK`
+  - duplicate `POST /api/orders` → `409 Conflict`
+  - `GET /api/orders` → `200 OK`
+  - `DELETE /api/orders/1` → `204 No Content`
+  - `GET /api/orders/1` → `404 Not Found`
+- Stopped the server cleanly with `Ctrl+C`:
+  - Output included:
+    - `INFO:     Shutting down`
+    - `INFO:     Waiting for application shutdown.`
+    - `INFO:     Application shutdown complete.`
+    - `INFO:     Finished server process [57117]`
+
+**Decisions made during this session:**
+- Kept the request and response Pydantic models in `backend/routes/orders.py` instead of splitting them out, matching the architecture rule against extra small files.
+- Used `body.model_dump(exclude_unset=True)` for `PUT` so partial updates only send fields the caller actually provided.
+
+**What was NOT done / deferred:**
+- No HTML templates were created
+- No authentication or role checks were added
+- No changes were made to `backend/database.py`, the Order model, or the service layer
+- Earlier in this session, I mistakenly launched the first list and create verification calls in parallel, which created a stray `SO-TEST-001` test row and invalidated the original verification order. I stopped, reported it, deleted that exact row with `sqlite3 data/leightner.db "DELETE FROM orders WHERE sales_order_number = 'SO-TEST-001';"`, and then reran the full verification sequentially.
+
+**Next suggested step:**
+- Build Step 5 of the Orders pattern next: HTML templates and page routes for listing, creating, and editing orders, while reusing this service/API behavior.
+
 ## 2026-04-17 — Added Orders service layer
 **Agent:** Codex
 **Session summary:** The operator asked for Step 2 of the Orders feature only: add the Orders service functions without building routes, templates, or changing app wiring.

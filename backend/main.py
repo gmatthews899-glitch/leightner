@@ -7,6 +7,7 @@ from fastapi import FastAPI
 
 from backend.database import init_db
 from backend.models import order as _order
+from backend.routes import orders as orders_routes
 
 
 @asynccontextmanager
@@ -16,6 +17,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(orders_routes.router)
 
 
 @app.get("/health")
