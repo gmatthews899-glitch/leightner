@@ -6,6 +6,89 @@ All agents must read this file at the start of every session and append an entry
 
 ---
 
+## 2026-04-20 — Polished Orders list visual indicators
+**Agent:** Codex
+**Session summary:** The operator asked for four specific visual tweaks to the existing Orders list page only: move the recent-update indicator into the Est Ship cell as a badge, simplify CrHld to plain `Y`/`N`, switch row dividers to low-opacity navy, and remove row-level `.recently-updated` styling.
+
+**Files created:**
+- none
+
+**Files modified:**
+- `frontend/templates/orders/list.html` — replaced the credit-hold pill/dash with plain `Y`/`N` text and added the `updated-badge` span before the Est Ship value when `recently_updated` is true
+- `frontend/static/css/styles.css` — added `.updated-badge`, changed table row dividers to low-opacity navy, removed the old credit-hold styling rule, and removed row-level `.recently-updated` visual styles
+- `CHANGELOG.md` — appended this session entry at the top in the required format
+
+**Files deleted:**
+- none
+
+**Dependencies added:**
+- none
+
+**Verified by:**
+- Activated the project venv and confirmed Python version:
+  - `source .venv/bin/activate`
+  - `python --version`
+  - Output: `Python 3.12.13`
+- Started the server without reload:
+  - `uvicorn backend.main:app --port 8000`
+  - Output included:
+    - `INFO:     Started server process [64546]`
+    - `INFO:     Waiting for application startup.`
+    - `INFO:     Application startup complete.`
+    - `INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)`
+- Seeded three verification rows sequentially:
+  - `curl -s -X POST http://127.0.0.1:8000/api/orders -H "Content-Type: application/json" -d '{"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-TWEAK-001","item_number":"P-A100","description":"Test","ship_qty":5,"backorder_qty":10,"estimated_ship_date":"2026-05-15"}'`
+  - Output: `{"id":4,"customer_code":"LMCO","customer_name":"Lockheed Martin","credit_hold":false,"sales_order_number":"SO-TWEAK-001","item_number":"P-A100","description":"Test","ship_qty":5,"backorder_qty":10,"total_qty":15,"estimated_ship_date":"2026-05-15","notes":null,"created_at":"2026-04-20T11:37:59","updated_at":"2026-04-20T11:37:59","updated_by":null}`
+  - `curl -s -X POST http://127.0.0.1:8000/api/orders -H "Content-Type: application/json" -d '{"customer_code":"NASA","customer_name":"NASA Goddard","credit_hold":true,"sales_order_number":"SO-TWEAK-002","item_number":"P-B200","description":"Test","ship_qty":0,"backorder_qty":3,"estimated_ship_date":"2026-06-01"}'`
+  - Output: `{"id":5,"customer_code":"NASA","customer_name":"NASA Goddard","credit_hold":true,"sales_order_number":"SO-TWEAK-002","item_number":"P-B200","description":"Test","ship_qty":0,"backorder_qty":3,"total_qty":3,"estimated_ship_date":"2026-06-01","notes":null,"created_at":"2026-04-20T11:38:06","updated_at":"2026-04-20T11:38:06","updated_by":null}`
+  - `curl -s -X POST http://127.0.0.1:8000/api/orders -H "Content-Type: application/json" -d '{"customer_code":"RAYTH","customer_name":"Raytheon","credit_hold":false,"sales_order_number":"SO-TWEAK-003","item_number":"P-C300","description":"Test","ship_qty":12,"backorder_qty":0,"estimated_ship_date":null}'`
+  - Output: `{"id":6,"customer_code":"RAYTH","customer_name":"Raytheon","credit_hold":false,"sales_order_number":"SO-TWEAK-003","item_number":"P-C300","description":"Test","ship_qty":12,"backorder_qty":0,"total_qty":12,"estimated_ship_date":null,"notes":null,"created_at":"2026-04-20T11:38:16","updated_at":"2026-04-20T11:38:16","updated_by":null}`
+- Fetched the Orders HTML and confirmed the new markup:
+  - `curl -s http://127.0.0.1:8000/orders | sed -n '1,120p'`
+  - Output included:
+    - the page shell and `<h1>Orders</h1>`
+    - Raytheon `CrHld` cell rendered as plain `N`
+    - NASA `CrHld` cell rendered as plain `Y`
+    - Lockheed `CrHld` cell rendered as plain `N`
+    - `<span class="updated-badge">!</span>` in all three newly seeded Est Ship cells
+    - Raytheon null Est Ship cell rendered as badge plus `<span class="dim">—</span>`
+    - no `credit-hold-yes` class in the rendered HTML
+  - Note: older non-tweak rows from prior sessions were still present lower in the table, but the three seeded `SO-TWEAK-*` rows appeared correctly and were used for this verification
+- Fetched the stylesheet and confirmed the CSS changes:
+  - `curl -s http://127.0.0.1:8000/static/css/styles.css`
+  - Output included:
+    - a new `.updated-badge` rule with `width: 15px`, `height: 15px`, `border-radius: 50%`, `background: var(--accent)`, and white `!` text
+    - `tbody td { border-bottom: 1px solid rgba(31, 58, 95, 0.2); }`
+    - no `.credit-hold-yes` rule
+    - no `.recently-updated` CSS rules creating row-level background, border, or emphasis
+- Cleaned up the three seeded verification rows by ID:
+  - `curl -s -X DELETE http://127.0.0.1:8000/api/orders/4`
+  - Output: empty body
+  - `curl -s -X DELETE http://127.0.0.1:8000/api/orders/5`
+  - Output: empty body
+  - `curl -s -X DELETE http://127.0.0.1:8000/api/orders/6`
+  - Output: empty body
+- Stopped the server cleanly with `Ctrl+C`:
+  - Output included:
+    - `INFO:     Shutting down`
+    - `INFO:     Waiting for application shutdown.`
+    - `INFO:     Application shutdown complete.`
+    - `INFO:     Finished server process [64546]`
+
+**Decisions made during this session:**
+- Set the new badge diameter to `15px`, which fits the operator’s requested 14–16px range while staying readable in the table.
+- Left the `.recently-updated` class on the `<tr>` markup for future extensibility but removed all CSS rules that gave the row any visual emphasis, per the request.
+
+**What was NOT done / deferred:**
+- No backend changes
+- No JavaScript changes
+- No new files
+- No sorting logic changes
+- No empty-state, heading, or layout changes outside the requested visual tweaks
+
+**Next suggested step:**
+- Continue the Orders UI work with whichever next list-view polish or create/edit workflow Rusty wants to see in the browser.
+
 ## 2026-04-17 — Added Orders HTML list view
 **Agent:** Codex
 **Session summary:** The operator asked for Step 5 of the Orders feature only: add the read-only HTML list page at `/orders`, plus the base template, styling, sorter script, and page-route wiring. Create/edit UI is intentionally deferred.

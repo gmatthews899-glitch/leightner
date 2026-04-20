@@ -31,9 +31,9 @@
               <td data-value="{{ order.customer_name }}">{{ order.customer_name }}</td>
               <td data-value="{% if order.credit_hold %}1{% else %}0{% endif %}">
                 {% if order.credit_hold %}
-                  <span class="pill credit-hold-yes">Yes</span>
+                  Y
                 {% else %}
-                  <span class="dim">—</span>
+                  N
                 {% endif %}
               </td>
               <td data-value="{{ order.sales_order_number }}">{{ order.sales_order_number }}</td>
@@ -43,6 +43,9 @@
               <td data-value="{{ order.backorder_qty }}">{{ order.backorder_qty }}</td>
               <td data-value="{{ order.total_qty }}">{{ order.total_qty }}</td>
               <td data-value="{% if order.estimated_ship_date %}{{ order.estimated_ship_date.isoformat() }}{% endif %}">
+                {% if order.recently_updated %}
+                  <span class="updated-badge">!</span>
+                {% endif %}
                 {% if not order.estimated_ship_date %}
                   <span class="dim">—</span>
                 {% elif order.estimated_ship_date == today_central %}
