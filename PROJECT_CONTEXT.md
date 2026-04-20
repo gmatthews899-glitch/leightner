@@ -233,6 +233,7 @@ Deliberately deferred. Don't touch until current module is done and in use.
 - Mobile-optimized views for shop floor tablets
 - Notifications when issue status changes
 - Attachment support on issues (photos, data sheets, PDFs)
+- Order field change history — click the "recently updated" indicator to see a timeline of every change to that order (e.g. "Est Ship changed from 5/15 to 5/20 by Rusty on Apr 17"). Requires a separate history table, service-layer hooks to record changes, a new API endpoint, and a UI popover. Deferred to post-MVP because we want Rusty using Orders in its simpler form first before deciding how much history detail actually matters to him.
 
 ---
 
